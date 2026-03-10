@@ -3,13 +3,13 @@ import { useState } from "react";
 import { useMembers } from "../hooks/useMembers";
 import { useFirestore } from "../hooks/useFirestore";
 
-// Get all guests from a signup (handles both old and new format)
+// Get all guests from a signup with day info (handles both old and new format)
 function allGuests(signup) {
   const guests = [];
-  if (signup.satGuests) guests.push(...signup.satGuests);
-  else if (signup.satGuest) guests.push(signup.satGuest);
-  if (signup.sunGuests) guests.push(...signup.sunGuests);
-  else if (signup.sunGuest) guests.push(signup.sunGuest);
+  const satGuests = Array.isArray(signup.satGuests) ? signup.satGuests : (signup.satGuest ? [signup.satGuest] : []);
+  const sunGuests = Array.isArray(signup.sunGuests) ? signup.sunGuests : (signup.sunGuest ? [signup.sunGuest] : []);
+  satGuests.forEach((g, i) => guests.push({ name: g, day: "sat", index: i }));
+  sunGuests.forEach((g, i) => guests.push({ name: g, day: "sun", index: i }));
   return guests;
 }
 
@@ -21,6 +21,17 @@ export default function SignupsTab() {
 
   const toggleUnlock = (name) => {
     setUnlocked((prev) => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  const removeGuest = (memberName, guestDay, guestIndex) => {
+    const current = signups[memberName] || {};
+    const key = guestDay === "sat" ? "satGuests" : "sunGuests";
+    const guests = Array.isArray(current[key]) ? [...current[key]] : [];
+    guests.splice(guestIndex, 1);
+    setSignups((prev) => ({
+      ...prev,
+      [memberName]: { ...current, [key]: guests },
+    }));
   };
 
   const toggleDay = (name, day) => {
@@ -117,8 +128,14 @@ export default function SignupsTab() {
                     {(allGuests(signup).length > 0) && (
                       <div className="flex flex-wrap gap-1 mt-1">
                         {allGuests(signup).map((g, i) => (
-                          <span key={i} className="inline-flex items-center bg-red-100 text-red-700 font-bold text-xs px-2 py-0.5 rounded-full">
-                            Guest: {g}
+                          <span key={i} className="inline-flex items-center gap-1 bg-red-100 text-red-700 font-bold text-xs px-2 py-0.5 rounded-full">
+                            Guest: {g.name}
+                            <button
+                              onClick={() => removeGuest(name, g.day, g.index)}
+                              className="text-red-400 hover:text-red-700 text-sm leading-none ml-0.5"
+                            >
+                              ×
+                            </button>
                           </span>
                         ))}
                       </div>
