@@ -147,6 +147,9 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
         <p className="text-center text-gray-400 text-sm mt-6">
           Signups lock 24 hours before tee time
         </p>
+        <p className="text-center text-gray-400 text-sm">
+          Please update the group on the Text Message Thread
+        </p>
       </div>
     </div>
   );
