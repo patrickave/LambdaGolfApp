@@ -105,11 +105,18 @@ export default function SignupsTab() {
                       {name}
                     </p>
                     {(signup.satGuest || signup.sunGuest) && (
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        {signup.satGuest && `Sat guest: ${signup.satGuest}`}
-                        {signup.satGuest && signup.sunGuest && " · "}
-                        {signup.sunGuest && `Sun guest: ${signup.sunGuest}`}
-                      </p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {signup.satGuest && (
+                          <span className="inline-flex items-center gap-0.5 bg-purple-100 text-purple-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                            +1 Sat: {signup.satGuest}
+                          </span>
+                        )}
+                        {signup.sunGuest && (
+                          <span className="inline-flex items-center gap-0.5 bg-purple-100 text-purple-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                            +1 Sun: {signup.sunGuest}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
