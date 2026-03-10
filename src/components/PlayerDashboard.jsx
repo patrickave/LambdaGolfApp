@@ -1,13 +1,13 @@
 // PlayerDashboard — Main player view showing day toggles, tee time assignment, and guest input
 import { useState } from "react";
 import { useWeekDates } from "../hooks/useWeekDates";
-import { useLocalStorage } from "../hooks/useLocalStorage";
+import { useFirestore } from "../hooks/useFirestore";
 import { formatTime } from "../data/teeTimes";
 
 export default function PlayerDashboard({ playerName, onChangeName, onAdminClick }) {
   const { saturdayStr, sundayStr, weekKey, satLocked, sunLocked } = useWeekDates();
-  const [signups, setSignups] = useLocalStorage("lambdagolf_signups", {});
-  const [pairings] = useLocalStorage("lambdagolf_pairings", {});
+  const [signups, setSignups] = useFirestore("lambdagolf_signups", {});
+  const [pairings] = useFirestore("lambdagolf_pairings", {});
 
   const mySignup = signups[playerName] || {
     saturday: false,

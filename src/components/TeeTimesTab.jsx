@@ -1,5 +1,5 @@
 // TeeTimesTab — Admin manages tee time slot statuses (default/available/pending) for each day
-import { useLocalStorage } from "../hooks/useLocalStorage";
+import { useFirestore } from "../hooks/useFirestore";
 import { useWeekDates } from "../hooks/useWeekDates";
 import { generateTeeTimeSlots, formatTime } from "../data/teeTimes";
 import { useState } from "react";
@@ -20,7 +20,7 @@ const STATUS_LABELS = {
 
 export default function TeeTimesTab() {
   const { saturdayStr, sundayStr } = useWeekDates();
-  const [teeTimes, setTeeTimes] = useLocalStorage("lambdagolf_tee_times", {
+  const [teeTimes, setTeeTimes] = useFirestore("lambdagolf_tee_times", {
     saturday: generateTeeTimeSlots(),
     sunday: generateTeeTimeSlots(),
   });

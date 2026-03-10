@@ -1,6 +1,9 @@
 // App — Root component handling routing between NameSetup, PlayerDashboard, AdminLogin, and AdminDashboard
 import { useLocalStorage } from "./hooks/useLocalStorage";
+import { useFirestore } from "./hooks/useFirestore";
 import { useWeekDates } from "./hooks/useWeekDates";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "./firebase";
 import SiteLogin from "./components/SiteLogin";
 import NameSetup from "./components/NameSetup";
 import PlayerDashboard from "./components/PlayerDashboard";
@@ -14,14 +17,14 @@ export default function App() {
   const [isAdmin, setIsAdmin] = useLocalStorage("lambdagolf_admin_session", false);
   const [view, setView] = useState("player"); // "player" | "admin-login" | "admin"
   const { weekKey } = useWeekDates();
-  const [storedWeek, setStoredWeek] = useLocalStorage("lambdagolf_week", "");
+  const [storedWeek, setStoredWeek] = useFirestore("lambdagolf_week", "");
 
   // Reset data if week has changed
   useEffect(() => {
     if (storedWeek && storedWeek !== weekKey) {
-      window.localStorage.removeItem("lambdagolf_signups");
-      window.localStorage.removeItem("lambdagolf_tee_times");
-      window.localStorage.removeItem("lambdagolf_pairings");
+      setDoc(doc(db, "state", "lambdagolf_signups"), { value: {} });
+      setDoc(doc(db, "state", "lambdagolf_tee_times"), { value: {} });
+      setDoc(doc(db, "state", "lambdagolf_pairings"), { value: {} });
     }
     setStoredWeek(weekKey);
   }, [weekKey, storedWeek, setStoredWeek]);

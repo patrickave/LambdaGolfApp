@@ -1,5 +1,5 @@
 // PairingsTab — Admin assigns players to available tee time slots in foursomes
-import { useLocalStorage } from "../hooks/useLocalStorage";
+import { useFirestore } from "../hooks/useFirestore";
 import { useWeekDates } from "../hooks/useWeekDates";
 import { generateTeeTimeSlots, formatTime } from "../data/teeTimes";
 import { useMembers } from "../hooks/useMembers";
@@ -7,12 +7,12 @@ import { useMembers } from "../hooks/useMembers";
 export default function PairingsTab() {
   const { members } = useMembers();
   const { saturdayStr, sundayStr } = useWeekDates();
-  const [signups] = useLocalStorage("lambdagolf_signups", {});
-  const [teeTimes] = useLocalStorage("lambdagolf_tee_times", {
+  const [signups] = useFirestore("lambdagolf_signups", {});
+  const [teeTimes] = useFirestore("lambdagolf_tee_times", {
     saturday: generateTeeTimeSlots(),
     sunday: generateTeeTimeSlots(),
   });
-  const [pairings, setPairings] = useLocalStorage("lambdagolf_pairings", {});
+  const [pairings, setPairings] = useFirestore("lambdagolf_pairings", {});
 
   // Get available tee times for a day
   const getAvailableSlots = (day) => {

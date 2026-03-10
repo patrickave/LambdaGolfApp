@@ -1,9 +1,9 @@
-// Shared hook for managing the member list in localStorage
-import { useLocalStorage } from "./useLocalStorage";
+// Shared hook for managing the member list in Firestore
+import { useFirestore } from "./useFirestore";
 import { defaultMembers } from "../data/members";
 
 export function useMembers() {
-  const [members, setMembers] = useLocalStorage("lambdagolf_members", defaultMembers);
+  const [members, setMembers] = useFirestore("lambdagolf_members", defaultMembers);
 
   const addMember = (name) => {
     const trimmed = name.trim();
