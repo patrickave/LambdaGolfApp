@@ -24,6 +24,7 @@ export default function TeeTimesTab() {
     saturday: generateTeeTimeSlots(),
     sunday: generateTeeTimeSlots(),
   });
+  const [pairings, setPairings] = useFirestore("lambdagolf_pairings", {});
   const [editingNote, setEditingNote] = useState(null);
   const [filter, setFilter] = useState("all"); // "all" | "available" | "traded" | "released"
 
@@ -37,7 +38,17 @@ export default function TeeTimesTab() {
       const slots = [...(prev[day] || generateTeeTimeSlots())];
       const current = slots[index].status;
       const nextIdx = (STATUS_CYCLE.indexOf(current) + 1) % STATUS_CYCLE.length;
-      slots[index] = { ...slots[index], status: STATUS_CYCLE[nextIdx] };
+      const nextStatus = STATUS_CYCLE[nextIdx];
+      // If leaving "available", clear pairings for this time slot
+      if (current === "available" && nextStatus !== "available") {
+        const timeKey = slots[index].time;
+        setPairings((prevPairings) => {
+          const dayPairings = { ...prevPairings[day] };
+          delete dayPairings[timeKey];
+          return { ...prevPairings, [day]: dayPairings };
+        });
+      }
+      slots[index] = { ...slots[index], status: nextStatus };
       return { ...prev, [day]: slots };
     });
   };
