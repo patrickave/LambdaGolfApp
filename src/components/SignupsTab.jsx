@@ -16,6 +16,7 @@ function allGuests(signup) {
 export default function SignupsTab() {
   const { members } = useMembers();
   const [signups, setSignups] = useFirestore("lambdagolf_signups", {});
+  const [pairings, setPairings] = useFirestore("lambdagolf_pairings", {});
   const [filter, setFilter] = useState("all"); // "all" | "saturday" | "sunday" | "none"
   const [unlocked, setUnlocked] = useState({}); // { [name]: true } for unlocked rows
 
@@ -23,7 +24,7 @@ export default function SignupsTab() {
     setUnlocked((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
-  const removeGuest = (memberName, guestDay, guestIndex) => {
+  const removeGuest = (memberName, guestDay, guestIndex, guestName) => {
     const current = signups[memberName] || {};
     const key = guestDay === "sat" ? "satGuests" : "sunGuests";
     const guests = Array.isArray(current[key]) ? [...current[key]] : [];
@@ -32,6 +33,21 @@ export default function SignupsTab() {
       ...prev,
       [memberName]: { ...current, [key]: guests },
     }));
+
+    // Remove guest from pairings
+    const day = guestDay === "sat" ? "saturday" : "sunday";
+    const dayPairings = pairings[day];
+    if (!dayPairings) return;
+    const guestLabel = `${guestName} (guest of ${memberName.split(" ")[0]})`;
+    const updated = {};
+    for (const [time, players] of Object.entries(dayPairings)) {
+      if (players) {
+        updated[time] = players.map((p) => p === guestLabel ? null : p);
+      } else {
+        updated[time] = players;
+      }
+    }
+    setPairings((prev) => ({ ...prev, [day]: updated }));
   };
 
   const toggleDay = (name, day) => {
@@ -130,12 +146,14 @@ export default function SignupsTab() {
                         {allGuests(signup).map((g, i) => (
                           <span key={i} className="inline-flex items-center gap-1 bg-red-100 text-red-700 font-bold text-xs px-2 py-0.5 rounded-full">
                             Guest: {g.name}
-                            <button
-                              onClick={() => removeGuest(name, g.day, g.index)}
-                              className="text-red-400 hover:text-red-700 text-sm leading-none ml-0.5"
-                            >
-                              ×
-                            </button>
+                            {isUnlocked && (
+                              <button
+                                onClick={() => removeGuest(name, g.day, g.index, g.name)}
+                                className="text-red-400 hover:text-red-700 text-sm leading-none ml-0.5"
+                              >
+                                ×
+                              </button>
+                            )}
                           </span>
                         ))}
                       </div>
