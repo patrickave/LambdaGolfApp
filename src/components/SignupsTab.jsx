@@ -1,9 +1,10 @@
 // SignupsTab — Admin view of all member signups with filtering and per-row unlock to override
 import { useState } from "react";
-import { members } from "../data/members";
+import { useMembers } from "../hooks/useMembers";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
 export default function SignupsTab() {
+  const { members } = useMembers();
   const [signups, setSignups] = useLocalStorage("lambdagolf_signups", {});
   const [filter, setFilter] = useState("all"); // "all" | "saturday" | "sunday" | "none"
   const [unlocked, setUnlocked] = useState({}); // { [name]: true } for unlocked rows

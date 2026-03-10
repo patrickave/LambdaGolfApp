@@ -3,11 +3,13 @@ import { useState } from "react";
 import SignupsTab from "./SignupsTab";
 import TeeTimesTab from "./TeeTimesTab";
 import PairingsTab from "./PairingsTab";
+import MembersTab from "./MembersTab";
 
 const TABS = [
   { id: "signups", label: "Signups" },
   { id: "teetimes", label: "Tee Times" },
   { id: "pairings", label: "Pairings" },
+  { id: "members", label: "Members" },
 ];
 
 export default function AdminDashboard({ onBack, onLogout }) {
@@ -61,6 +63,7 @@ export default function AdminDashboard({ onBack, onLogout }) {
         {activeTab === "signups" && <SignupsTab />}
         {activeTab === "teetimes" && <TeeTimesTab />}
         {activeTab === "pairings" && <PairingsTab />}
+        {activeTab === "members" && <MembersTab />}
       </div>
     </div>
   );

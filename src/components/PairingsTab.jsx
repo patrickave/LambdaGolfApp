@@ -2,9 +2,10 @@
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useWeekDates } from "../hooks/useWeekDates";
 import { generateTeeTimeSlots, formatTime } from "../data/teeTimes";
-import { members } from "../data/members";
+import { useMembers } from "../hooks/useMembers";
 
 export default function PairingsTab() {
+  const { members } = useMembers();
   const { saturdayStr, sundayStr } = useWeekDates();
   const [signups] = useLocalStorage("lambdagolf_signups", {});
   const [teeTimes] = useLocalStorage("lambdagolf_tee_times", {

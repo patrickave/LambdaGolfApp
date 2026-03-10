@@ -1,5 +1,5 @@
-// Predefined list of Lambda Golf group members
-export const members = [
+// Default member list — used as seed when no localStorage data exists
+export const defaultMembers = [
   "Alec Keller",
   "Alex Genschoreck",
   "Andy Ihle",

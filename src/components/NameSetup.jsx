@@ -1,8 +1,9 @@
 // NameSetup — Full-screen prompt for first-time users to pick their name from the member list
 import { useState } from "react";
-import { members } from "../data/members";
+import { useMembers } from "../hooks/useMembers";
 
 export default function NameSetup({ onNameSelected }) {
+  const { members } = useMembers();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState("");
 
