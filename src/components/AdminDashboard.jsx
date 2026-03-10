@@ -1,5 +1,7 @@
-// AdminDashboard — Tabbed admin interface with Signups, Tee Times, and Pairings tabs
+// AdminDashboard — Tabbed admin interface with Signups, Tee Times, Pairings, and Members tabs
 import { useState } from "react";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase";
 import SignupsTab from "./SignupsTab";
 import TeeTimesTab from "./TeeTimesTab";
 import PairingsTab from "./PairingsTab";
@@ -14,6 +16,14 @@ const TABS = [
 
 export default function AdminDashboard({ onBack, onLogout }) {
   const [activeTab, setActiveTab] = useState("signups");
+
+  const handleResetWeek = () => {
+    if (window.confirm("Reset everything? This clears all signups, tee times, and pairings.")) {
+      setDoc(doc(db, "state", "lambdagolf_signups"), { value: {} });
+      setDoc(doc(db, "state", "lambdagolf_tee_times"), { value: {} });
+      setDoc(doc(db, "state", "lambdagolf_pairings"), { value: {} });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f8faf5] pb-20">
@@ -64,6 +74,16 @@ export default function AdminDashboard({ onBack, onLogout }) {
         {activeTab === "teetimes" && <TeeTimesTab />}
         {activeTab === "pairings" && <PairingsTab />}
         {activeTab === "members" && <MembersTab />}
+
+        {/* Reset Week */}
+        <div className="mt-10 pt-6 border-t border-gray-200">
+          <button
+            onClick={handleResetWeek}
+            className="w-full py-3 rounded-xl bg-red-100 text-red-700 font-semibold text-sm hover:bg-red-200 transition-colors"
+          >
+            Reset Week — Clear All Signups, Tee Times & Pairings
+          </button>
+        </div>
       </div>
     </div>
   );
