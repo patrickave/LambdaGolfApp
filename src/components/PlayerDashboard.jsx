@@ -72,11 +72,11 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
         {/* Tee Time Display — prominent, at the top */}
         <div className={`rounded-2xl p-5 shadow-sm border-2 ${
           satTeeTime || sunTeeTime
-            ? "bg-red-50 border-red-400"
+            ? "bg-gray-50 border-gray-800"
             : "bg-white border-gray-100"
         }`}>
           <h3 className={`text-xl font-bold mb-3 ${
-            satTeeTime || sunTeeTime ? "text-red-600" : "text-gray-400"
+            satTeeTime || sunTeeTime ? "text-[#1e3a5f]" : "text-gray-400"
           }`}>
             YOUR TEE TIMES
           </h3>
@@ -84,11 +84,11 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
             <div className="space-y-3">
               {satTeeTime && (
                 <div>
-                  <p className="text-lg font-bold text-red-700">
+                  <p className="text-lg font-bold text-gray-900">
                     Saturday — {formatTime(satTeeTime.time)}
                   </p>
                   {satTeeTime.groupMates.length > 0 && (
-                    <p className="text-sm text-red-600/70 mt-0.5">
+                    <p className="text-sm text-gray-600 mt-0.5">
                       Playing with: {satTeeTime.groupMates.join(", ")}
                     </p>
                   )}
@@ -96,11 +96,11 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
               )}
               {sunTeeTime && (
                 <div>
-                  <p className="text-lg font-bold text-red-700">
+                  <p className="text-lg font-bold text-gray-900">
                     Sunday — {formatTime(sunTeeTime.time)}
                   </p>
                   {sunTeeTime.groupMates.length > 0 && (
-                    <p className="text-sm text-red-600/70 mt-0.5">
+                    <p className="text-sm text-gray-600 mt-0.5">
                       Playing with: {sunTeeTime.groupMates.join(", ")}
                     </p>
                   )}
