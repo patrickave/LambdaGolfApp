@@ -3,6 +3,16 @@ import { useState } from "react";
 import { useMembers } from "../hooks/useMembers";
 import { useFirestore } from "../hooks/useFirestore";
 
+// Get all guests from a signup (handles both old and new format)
+function allGuests(signup) {
+  const guests = [];
+  if (signup.satGuests) guests.push(...signup.satGuests);
+  else if (signup.satGuest) guests.push(signup.satGuest);
+  if (signup.sunGuests) guests.push(...signup.sunGuests);
+  else if (signup.sunGuest) guests.push(signup.sunGuest);
+  return guests;
+}
+
 export default function SignupsTab() {
   const { members } = useMembers();
   const [signups, setSignups] = useFirestore("lambdagolf_signups", {});
@@ -104,18 +114,13 @@ export default function SignupsTab() {
                     <p className={`font-medium text-sm truncate ${!hasResponse ? "text-amber-700" : ""}`}>
                       {name}
                     </p>
-                    {(signup.satGuest || signup.sunGuest) && (
+                    {(allGuests(signup).length > 0) && (
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {signup.satGuest && (
-                          <span className="inline-flex items-center gap-0.5 bg-red-100 text-red-700 font-bold text-xs font-medium px-2 py-0.5 rounded-full">
-                            +1 Sat: {signup.satGuest}
+                        {allGuests(signup).map((g, i) => (
+                          <span key={i} className="inline-flex items-center bg-red-100 text-red-700 font-bold text-xs px-2 py-0.5 rounded-full">
+                            Guest: {g}
                           </span>
-                        )}
-                        {signup.sunGuest && (
-                          <span className="inline-flex items-center gap-0.5 bg-red-100 text-red-700 font-bold text-xs font-medium px-2 py-0.5 rounded-full">
-                            +1 Sun: {signup.sunGuest}
-                          </span>
-                        )}
+                        ))}
                       </div>
                     )}
                   </div>

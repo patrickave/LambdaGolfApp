@@ -22,12 +22,14 @@ export default function PairingsTab() {
   // Get all players signed up for a day (including guests)
   const getPlayersForDay = (day) => {
     const players = [];
-    const guestKey = day === "saturday" ? "satGuest" : "sunGuest";
+    const guestsKey = day === "saturday" ? "satGuests" : "sunGuests";
+    const oldGuestKey = day === "saturday" ? "satGuest" : "sunGuest";
     for (const name of members) {
       if (signups[name]?.[day]) {
         players.push(name);
-        if (signups[name][guestKey]) {
-          players.push(`${signups[name][guestKey]} (guest of ${name.split(" ")[0]})`);
+        const guestList = signups[name][guestsKey] || (signups[name][oldGuestKey] ? [signups[name][oldGuestKey]] : []);
+        for (const g of guestList) {
+          if (g) players.push(`${g} (guest of ${name.split(" ")[0]})`);
         }
       }
     }

@@ -12,9 +12,18 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
   const mySignup = signups[playerName] || {
     saturday: false,
     sunday: false,
-    satGuest: "",
-    sunGuest: "",
+    satGuests: [],
+    sunGuests: [],
   };
+  // Migrate old single-guest format
+  if (typeof mySignup.satGuest === "string" && mySignup.satGuest) {
+    mySignup.satGuests = [mySignup.satGuest];
+  }
+  if (typeof mySignup.sunGuest === "string" && mySignup.sunGuest) {
+    mySignup.sunGuests = [mySignup.sunGuest];
+  }
+  if (!mySignup.satGuests) mySignup.satGuests = [];
+  if (!mySignup.sunGuests) mySignup.sunGuests = [];
 
   const updateSignup = (updates) => {
     setSignups((prev) => ({
@@ -23,19 +32,18 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
     }));
   };
 
-  // Remove player and their guest from pairings for a given day
+  // Remove player and their guests from pairings for a given day
   const removeFromPairings = (day) => {
     const dayPairings = pairings[day];
     if (!dayPairings) return;
-    const guestKey = day === "saturday" ? "satGuest" : "sunGuest";
-    const guestName = mySignup[guestKey];
-    const guestLabel = guestName ? `${guestName} (guest of ${playerName.split(" ")[0]})` : null;
+    const guests = day === "saturday" ? mySignup.satGuests : mySignup.sunGuests;
+    const guestLabels = new Set(guests.map((g) => `${g} (guest of ${playerName.split(" ")[0]})`));
 
     const updated = {};
     for (const [time, players] of Object.entries(dayPairings)) {
       if (players) {
         updated[time] = players.map((p) =>
-          p === playerName || p === guestLabel ? null : p
+          p === playerName || guestLabels.has(p) ? null : p
         );
       } else {
         updated[time] = players;
@@ -137,34 +145,36 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
         <DayCard
           label={saturdayStr}
           isOn={mySignup.saturday}
-          guest={mySignup.satGuest}
+          guests={mySignup.satGuests}
           timeLocked={satLocked}
           onToggle={(turnOff) => {
             if (turnOff) {
               removeFromPairings("saturday");
-              updateSignup({ saturday: false, satGuest: "" });
+              updateSignup({ saturday: false, satGuests: [] });
             } else {
               updateSignup({ saturday: true });
             }
           }}
-          onGuestChange={(val) => updateSignup({ satGuest: val })}
+          onAddGuest={(name) => updateSignup({ satGuests: [...mySignup.satGuests, name] })}
+          onRemoveGuest={(i) => updateSignup({ satGuests: mySignup.satGuests.filter((_, idx) => idx !== i) })}
         />
 
         {/* Sunday toggle */}
         <DayCard
           label={sundayStr}
           isOn={mySignup.sunday}
-          guest={mySignup.sunGuest}
+          guests={mySignup.sunGuests}
           timeLocked={sunLocked}
           onToggle={(turnOff) => {
             if (turnOff) {
               removeFromPairings("sunday");
-              updateSignup({ sunday: false, sunGuest: "" });
+              updateSignup({ sunday: false, sunGuests: [] });
             } else {
               updateSignup({ sunday: true });
             }
           }}
-          onGuestChange={(val) => updateSignup({ sunGuest: val })}
+          onAddGuest={(name) => updateSignup({ sunGuests: [...mySignup.sunGuests, name] })}
+          onRemoveGuest={(i) => updateSignup({ sunGuests: mySignup.sunGuests.filter((_, idx) => idx !== i) })}
         />
 
         <p className="text-center text-gray-400 text-sm mt-6">
@@ -179,9 +189,10 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
 }
 
 // DayCard — Toggle card with auto-lock after selection, lock icon to unlock and cancel
-function DayCard({ label, isOn, guest, timeLocked, onToggle, onGuestChange }) {
+function DayCard({ label, isOn, guests = [], timeLocked, onToggle, onAddGuest, onRemoveGuest }) {
   const [userLocked, setUserLocked] = useState(true);
   const [showCancelMsg, setShowCancelMsg] = useState(false);
+  const [newGuest, setNewGuest] = useState("");
 
   // Auto-lock is active when the day is selected and user hasn't unlocked
   const isLocked = isOn && userLocked;
@@ -276,15 +287,52 @@ function DayCard({ label, isOn, guest, timeLocked, onToggle, onGuestChange }) {
       {isOn && (
         <div className="mt-3 pt-3 border-t border-[#b7e4c7]">
           <label className="text-sm text-[#2d6a4f] font-medium">
-            Bringing a guest?
+            Bringing guests?
           </label>
-          <input
-            type="text"
-            placeholder="Enter guest name"
-            value={guest}
-            onChange={(e) => onGuestChange(e.target.value)}
-            className="w-full mt-1 px-3 py-2 rounded-lg border border-[#b7e4c7] bg-white text-sm focus:outline-none focus:border-[#2d6a4f]"
-          />
+          {guests.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {guests.map((g, i) => (
+                <span key={i} className="inline-flex items-center gap-1 bg-white text-[#1b4332] text-sm font-medium px-3 py-1 rounded-full border border-[#b7e4c7]">
+                  {g}
+                  <button
+                    onClick={() => onRemoveGuest(i)}
+                    className="text-gray-400 hover:text-red-500 text-lg leading-none ml-0.5"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (newGuest.trim()) {
+                onAddGuest(newGuest.trim());
+                setNewGuest("");
+              }
+            }}
+            className="flex gap-2 mt-2"
+          >
+            <input
+              type="text"
+              placeholder="Guest name"
+              value={newGuest}
+              onChange={(e) => setNewGuest(e.target.value)}
+              className="flex-1 px-3 py-2 rounded-lg border border-[#b7e4c7] bg-white text-sm focus:outline-none focus:border-[#2d6a4f]"
+            />
+            <button
+              type="submit"
+              disabled={!newGuest.trim()}
+              className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                newGuest.trim()
+                  ? "bg-[#2d6a4f] text-white"
+                  : "bg-gray-200 text-gray-400"
+              }`}
+            >
+              Add
+            </button>
+          </form>
         </div>
       )}
     </div>
