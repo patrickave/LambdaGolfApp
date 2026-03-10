@@ -250,7 +250,7 @@ function DayCard({ label, isOn, guest, timeLocked, onToggle, onGuestChange }) {
         </div>
       )}
 
-      {isOn && !isLocked && (
+      {isOn && (
         <div className="mt-3 pt-3 border-t border-[#b7e4c7]">
           <label className="text-sm text-[#2d6a4f] font-medium">
             Bringing a guest?
