@@ -21,7 +21,7 @@ export default function NameSetup({ onNameSelected }) {
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm">
-        <img src="/lambda-logo.jpg" alt="Lambda Golf" className="w-20 h-20 rounded-full mx-auto mb-4" />
+        <img src={`${import.meta.env.BASE_URL}lambda-logo.jpg`} alt="Lambda Golf" className="w-20 h-20 rounded-full mx-auto mb-4" />
         <h1 className="text-3xl font-bold text-white text-center mb-2">
           Lambda Golf
         </h1>

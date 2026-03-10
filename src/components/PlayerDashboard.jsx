@@ -44,7 +44,7 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
       <div className="bg-black text-white px-5 pt-12 pb-6 rounded-b-3xl">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
-            <img src="/lambda-logo.jpg" alt="Lambda Golf" className="w-16 h-16 rounded-full" />
+            <img src={`${import.meta.env.BASE_URL}lambda-logo.jpg`} alt="Lambda Golf" className="w-16 h-16 rounded-full" />
             <h1 className="text-2xl font-bold">Lambda Golf</h1>
           </div>
           <div className="flex flex-col items-end gap-1 pt-1">

@@ -18,7 +18,7 @@ export default function SiteLogin({ onLogin }) {
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm">
-        <img src="/lambda-logo.jpg" alt="Lambda Golf" className="w-24 h-24 rounded-full mx-auto mb-4" />
+        <img src={`${import.meta.env.BASE_URL}lambda-logo.jpg`} alt="Lambda Golf" className="w-24 h-24 rounded-full mx-auto mb-4" />
         <h1 className="text-3xl font-bold text-white text-center mb-2">
           Lambda Golf
         </h1>

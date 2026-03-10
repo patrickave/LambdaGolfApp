@@ -1,37 +1,65 @@
-// SignupsTab — Admin view of all member signups with override capability
+// SignupsTab — Admin read-only view of all member signups with filtering
+import { useState } from "react";
 import { members } from "../data/members";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
 export default function SignupsTab() {
-  const [signups, setSignups] = useLocalStorage("lambdagolf_signups", {});
-
-  const toggleDay = (name, day) => {
-    const current = signups[name] || { saturday: false, sunday: false, satGuest: "", sunGuest: "" };
-    setSignups((prev) => ({
-      ...prev,
-      [name]: { ...current, [day]: !current[day] },
-    }));
-  };
+  const [signups] = useLocalStorage("lambdagolf_signups", {});
+  const [filter, setFilter] = useState("all"); // "all" | "saturday" | "sunday" | "none"
 
   const satCount = members.filter((m) => signups[m]?.saturday).length;
   const sunCount = members.filter((m) => signups[m]?.sunday).length;
   const noResponse = members.filter((m) => !signups[m]?.saturday && !signups[m]?.sunday);
 
+  const filteredMembers = members.filter((name) => {
+    const signup = signups[name];
+    if (filter === "saturday") return signup?.saturday;
+    if (filter === "sunday") return signup?.sunday;
+    if (filter === "none") return !signup?.saturday && !signup?.sunday;
+    return true;
+  });
+
   return (
     <div>
-      {/* Count badges */}
-      <div className="flex gap-3 mb-4">
-        <span className="bg-[#d8f3dc] text-[#1b4332] px-3 py-1 rounded-full text-sm font-semibold">
-          {satCount} playing Saturday
-        </span>
-        <span className="bg-[#d8f3dc] text-[#1b4332] px-3 py-1 rounded-full text-sm font-semibold">
-          {sunCount} playing Sunday
-        </span>
+      {/* Filter badges */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <button
+          onClick={() => setFilter(filter === "all" ? "all" : "all")}
+          className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors min-h-[36px] ${
+            filter === "all" ? "bg-[#2d6a4f] text-white" : "bg-gray-200 text-gray-600"
+          }`}
+        >
+          All ({members.length})
+        </button>
+        <button
+          onClick={() => setFilter(filter === "saturday" ? "all" : "saturday")}
+          className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors min-h-[36px] ${
+            filter === "saturday" ? "bg-[#2d6a4f] text-white" : "bg-[#d8f3dc] text-[#1b4332]"
+          }`}
+        >
+          Saturday ({satCount})
+        </button>
+        <button
+          onClick={() => setFilter(filter === "sunday" ? "all" : "sunday")}
+          className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors min-h-[36px] ${
+            filter === "sunday" ? "bg-[#2d6a4f] text-white" : "bg-[#d8f3dc] text-[#1b4332]"
+          }`}
+        >
+          Sunday ({sunCount})
+        </button>
+        <button
+          onClick={() => setFilter(filter === "none" ? "all" : "none")}
+          className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors min-h-[36px] ${
+            filter === "none" ? "bg-amber-600 text-white" : "bg-amber-100 text-amber-700"
+          }`}
+        >
+          No Response ({noResponse.length})
+        </button>
       </div>
 
-      {/* Member rows */}
+      {/* Member rows — read-only */}
       <div className="space-y-2">
-        {members.map((name) => {
+        {filteredMembers.map((name) => {
           const signup = signups[name] || { saturday: false, sunday: false, satGuest: "", sunGuest: "" };
           const hasResponse = signup.saturday || signup.sunday;
 
@@ -56,26 +84,24 @@ export default function SignupsTab() {
                   )}
                 </div>
                 <div className="flex gap-2 ml-2">
-                  <button
-                    onClick={() => toggleDay(name, "saturday")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold min-h-[36px] transition-colors ${
+                  <span
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold min-h-[36px] flex items-center ${
                       signup.saturday
                         ? "bg-[#2d6a4f] text-white"
-                        : "bg-gray-100 text-gray-500"
+                        : "bg-gray-100 text-gray-400"
                     }`}
                   >
                     Sat
-                  </button>
-                  <button
-                    onClick={() => toggleDay(name, "sunday")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold min-h-[36px] transition-colors ${
+                  </span>
+                  <span
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold min-h-[36px] flex items-center ${
                       signup.sunday
                         ? "bg-[#2d6a4f] text-white"
-                        : "bg-gray-100 text-gray-500"
+                        : "bg-gray-100 text-gray-400"
                     }`}
                   >
                     Sun
-                  </button>
+                  </span>
                 </div>
               </div>
             </div>
@@ -83,10 +109,8 @@ export default function SignupsTab() {
         })}
       </div>
 
-      {noResponse.length > 0 && (
-        <p className="text-sm text-amber-600 mt-4">
-          {noResponse.length} member{noResponse.length !== 1 ? "s" : ""} haven't responded yet
-        </p>
+      {filteredMembers.length === 0 && (
+        <p className="text-gray-400 text-sm text-center mt-4">No members match this filter</p>
       )}
     </div>
   );

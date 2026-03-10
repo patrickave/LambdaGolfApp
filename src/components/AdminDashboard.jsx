@@ -19,7 +19,7 @@ export default function AdminDashboard({ onBack }) {
       <div className="bg-black text-white px-5 pt-12 pb-4 rounded-b-3xl">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-3">
-            <img src="/lambda-logo.jpg" alt="Lambda Golf" className="w-10 h-10 rounded-full" />
+            <img src={`${import.meta.env.BASE_URL}lambda-logo.jpg`} alt="Lambda Golf" className="w-10 h-10 rounded-full" />
             <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           </div>
           <button
