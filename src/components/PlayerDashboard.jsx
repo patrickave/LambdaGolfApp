@@ -49,7 +49,7 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
           </div>
           <button
             onClick={onAdminClick}
-            className="text-gray-400 text-sm opacity-60 hover:opacity-100 transition-opacity pt-1"
+            className="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 text-xs font-medium hover:bg-gray-700 transition-colors mt-1"
           >
             Admin
           </button>
@@ -60,12 +60,12 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
         {/* Player name with "not you" */}
         <div className="text-center mb-2">
           <h2 className="text-2xl font-bold text-[#1b4332]">{playerName}</h2>
-          <span
+          <button
             onClick={onChangeName}
-            className="text-sm text-gray-400 cursor-pointer hover:text-gray-600 transition-colors"
+            className="mt-1 px-3 py-1 rounded-full bg-gray-100 text-gray-500 text-xs font-medium hover:bg-gray-200 transition-colors"
           >
-            Not you?
-          </span>
+            Not you? Switch player
+          </button>
         </div>
 
         {/* Saturday toggle */}
