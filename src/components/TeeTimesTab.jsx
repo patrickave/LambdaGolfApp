@@ -34,7 +34,7 @@ export default function TeeTimesTab() {
 
   const cycleStatus = (day, index) => {
     setTeeTimes((prev) => {
-      const slots = [...prev[day]];
+      const slots = [...(prev[day] || generateTeeTimeSlots())];
       const current = slots[index].status;
       const nextIdx = (STATUS_CYCLE.indexOf(current) + 1) % STATUS_CYCLE.length;
       slots[index] = { ...slots[index], status: STATUS_CYCLE[nextIdx] };
@@ -44,7 +44,7 @@ export default function TeeTimesTab() {
 
   const updateNote = (day, index, note) => {
     setTeeTimes((prev) => {
-      const slots = [...prev[day]];
+      const slots = [...(prev[day] || generateTeeTimeSlots())];
       slots[index] = { ...slots[index], note };
       return { ...prev, [day]: slots };
     });
