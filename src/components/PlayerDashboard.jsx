@@ -7,7 +7,7 @@ import { formatTime } from "../data/teeTimes";
 export default function PlayerDashboard({ playerName, onChangeName, onAdminClick }) {
   const { saturdayStr, sundayStr, weekKey, satLocked, sunLocked } = useWeekDates();
   const [signups, setSignups] = useFirestore("lambdagolf_signups", {});
-  const [pairings] = useFirestore("lambdagolf_pairings", {});
+  const [pairings, setPairings] = useFirestore("lambdagolf_pairings", {});
 
   const mySignup = signups[playerName] || {
     saturday: false,
@@ -21,6 +21,27 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
       ...prev,
       [playerName]: { ...mySignup, ...updates },
     }));
+  };
+
+  // Remove player and their guest from pairings for a given day
+  const removeFromPairings = (day) => {
+    const dayPairings = pairings[day];
+    if (!dayPairings) return;
+    const guestKey = day === "saturday" ? "satGuest" : "sunGuest";
+    const guestName = mySignup[guestKey];
+    const guestLabel = guestName ? `${guestName} (guest of ${playerName.split(" ")[0]})` : null;
+
+    const updated = {};
+    for (const [time, players] of Object.entries(dayPairings)) {
+      if (players) {
+        updated[time] = players.map((p) =>
+          p === playerName || p === guestLabel ? null : p
+        );
+      } else {
+        updated[time] = players;
+      }
+    }
+    setPairings((prev) => ({ ...prev, [day]: updated }));
   };
 
   // Find player's tee time assignment and group mates
@@ -120,6 +141,7 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
           timeLocked={satLocked}
           onToggle={(turnOff) => {
             if (turnOff) {
+              removeFromPairings("saturday");
               updateSignup({ saturday: false, satGuest: "" });
             } else {
               updateSignup({ saturday: true });
@@ -136,6 +158,7 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
           timeLocked={sunLocked}
           onToggle={(turnOff) => {
             if (turnOff) {
+              removeFromPairings("sunday");
               updateSignup({ sunday: false, sunGuest: "" });
             } else {
               updateSignup({ sunday: true });
