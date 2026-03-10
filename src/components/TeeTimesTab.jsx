@@ -25,6 +25,12 @@ export default function TeeTimesTab() {
     sunday: generateTeeTimeSlots(),
   });
   const [editingNote, setEditingNote] = useState(null);
+  const [filter, setFilter] = useState("all"); // "all" | "available" | "traded" | "released"
+
+  const allSlots = [...(teeTimes.saturday || []), ...(teeTimes.sunday || [])];
+  const availCount = allSlots.filter((s) => s.status === "available").length;
+  const tradedCount = allSlots.filter((s) => s.status === "traded").length;
+  const releasedCount = allSlots.filter((s) => s.status === "released").length;
 
   const cycleStatus = (day, index) => {
     setTeeTimes((prev) => {
@@ -45,12 +51,15 @@ export default function TeeTimesTab() {
   };
 
   const renderColumn = (day, label) => {
-    const slots = teeTimes[day] || generateTeeTimeSlots();
+    const allDaySlots = teeTimes[day] || generateTeeTimeSlots();
+    const slots = allDaySlots.map((slot, i) => ({ ...slot, originalIndex: i }));
+    const filtered = filter === "all" ? slots : slots.filter((s) => s.status === filter);
     return (
       <div className="flex-1 min-w-0">
         <h3 className="text-sm font-bold text-[#1b4332] mb-2 text-center">{label}</h3>
         <div className="space-y-1.5">
-          {slots.map((slot, i) => {
+          {filtered.map((slot) => {
+            const i = slot.originalIndex;
             const noteKey = `${day}-${i}`;
             return (
               <div key={slot.time} className="relative">
@@ -93,6 +102,41 @@ export default function TeeTimesTab() {
 
   return (
     <div>
+      {/* Filter badges */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <button
+          onClick={() => setFilter("all")}
+          className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors min-h-[36px] ${
+            filter === "all" ? "bg-[#2d6a4f] text-white" : "bg-gray-200 text-gray-600"
+          }`}
+        >
+          All
+        </button>
+        <button
+          onClick={() => setFilter(filter === "available" ? "all" : "available")}
+          className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors min-h-[36px] ${
+            filter === "available" ? "bg-[#2d6a4f] text-white" : "bg-[#d8f3dc] text-[#1b4332]"
+          }`}
+        >
+          Available ({availCount})
+        </button>
+        <button
+          onClick={() => setFilter(filter === "traded" ? "all" : "traded")}
+          className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors min-h-[36px] ${
+            filter === "traded" ? "bg-blue-600 text-white" : "bg-blue-50 text-blue-800"
+          }`}
+        >
+          Traded ({tradedCount})
+        </button>
+        <button
+          onClick={() => setFilter(filter === "released" ? "all" : "released")}
+          className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors min-h-[36px] ${
+            filter === "released" ? "bg-red-600 text-white" : "bg-red-50 text-red-700"
+          }`}
+        >
+          Released ({releasedCount})
+        </button>
+      </div>
       <p className="text-xs text-gray-500 mb-4">
         Tap a time slot to cycle: Default → Available → Traded → Released
       </p>
