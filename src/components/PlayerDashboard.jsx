@@ -4,7 +4,7 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 import { formatTime } from "../data/teeTimes";
 
 export default function PlayerDashboard({ playerName, onChangeName, onAdminClick }) {
-  const { saturdayStr, sundayStr, weekKey } = useWeekDates();
+  const { saturdayStr, sundayStr, weekKey, satLocked, sunLocked } = useWeekDates();
   const [signups, setSignups] = useLocalStorage("lambdagolf_signups", {});
   const [pairings] = useLocalStorage("lambdagolf_pairings", {});
 
@@ -70,22 +70,20 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
 
         {/* Saturday toggle */}
         <DayCard
-          day="saturday"
           label={saturdayStr}
           isOn={mySignup.saturday}
           guest={mySignup.satGuest}
-          teeTime={satTeeTime}
+          locked={satLocked}
           onToggle={() => updateSignup({ saturday: !mySignup.saturday, satGuest: !mySignup.saturday ? mySignup.satGuest : "" })}
           onGuestChange={(val) => updateSignup({ satGuest: val })}
         />
 
         {/* Sunday toggle */}
         <DayCard
-          day="sunday"
           label={sundayStr}
           isOn={mySignup.sunday}
           guest={mySignup.sunGuest}
-          teeTime={sunTeeTime}
+          locked={sunLocked}
           onToggle={() => updateSignup({ sunday: !mySignup.sunday, sunGuest: !mySignup.sunday ? mySignup.sunGuest : "" })}
           onGuestChange={(val) => updateSignup({ sunGuest: val })}
         />
@@ -128,7 +126,7 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
         </div>
 
         <p className="text-center text-gray-400 text-sm mt-6">
-          Tap to update anytime before Friday at noon
+          Signups lock 24 hours before tee time
         </p>
       </div>
     </div>
@@ -136,7 +134,31 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
 }
 
 // DayCard — Toggle card for a single day (Saturday or Sunday)
-function DayCard({ label, isOn, guest, teeTime, onToggle, onGuestChange }) {
+function DayCard({ label, isOn, guest, locked, onToggle, onGuestChange }) {
+  if (locked) {
+    return (
+      <div
+        className={`rounded-2xl p-5 shadow-sm border-2 transition-all duration-200 ${
+          isOn
+            ? "bg-[#d8f3dc] border-[#52b788] opacity-75"
+            : "bg-gray-50 border-gray-200 opacity-75"
+        }`}
+      >
+        <div className="flex justify-between items-center min-h-[48px]">
+          <span className={`text-lg font-semibold ${isOn ? "text-[#1b4332]" : "text-gray-600"}`}>
+            {label}
+          </span>
+          <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-lg">
+            Locked
+          </span>
+        </div>
+        <p className="text-sm text-gray-500 mt-2">
+          Signups are locked. Please let the text thread know if anything changes.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`rounded-2xl p-5 shadow-sm border-2 transition-all duration-200 ${

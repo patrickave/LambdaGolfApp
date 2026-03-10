@@ -20,12 +20,19 @@ export function useWeekDates() {
       sunday = nextSunday(today);
     }
 
+    // Lockout 24 hours before each day
+    const now = new Date();
+    const satLocked = now >= new Date(saturday.getTime() - 24 * 60 * 60 * 1000);
+    const sunLocked = now >= new Date(sunday.getTime() - 24 * 60 * 60 * 1000);
+
     return {
       saturday,
       sunday,
       saturdayStr: format(saturday, "EEEE, MMM d"),
       sundayStr: format(sunday, "EEEE, MMM d"),
       weekKey: format(saturday, "yyyy-MM-dd"),
+      satLocked,
+      sunLocked,
     };
   }, []);
 }
