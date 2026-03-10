@@ -58,8 +58,8 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
 
       <div className="px-5 mt-6 space-y-4 max-w-lg mx-auto">
         {/* Player name with "not you" */}
-        <div className="flex items-baseline gap-2">
-          <h2 className="text-lg font-bold text-[#1b4332]">{playerName}</h2>
+        <div className="text-center mb-2">
+          <h2 className="text-2xl font-bold text-[#1b4332]">{playerName}</h2>
           <span
             onClick={onChangeName}
             className="text-sm text-gray-400 cursor-pointer hover:text-gray-600 transition-colors"
