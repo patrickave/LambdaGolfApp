@@ -54,6 +54,22 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
     setPairings((prev) => ({ ...prev, [day]: updated }));
   };
 
+  // Remove a single guest from pairings for a given day
+  const removeGuestFromPairings = (day, guestName) => {
+    const dayPairings = pairings[day];
+    if (!dayPairings) return;
+    const guestLabel = `${guestName} (guest of ${playerName.split(" ")[0]})`;
+    const updated = {};
+    for (const [time, players] of Object.entries(dayPairings)) {
+      if (players) {
+        updated[time] = players.map((p) => p === guestLabel ? null : p);
+      } else {
+        updated[time] = players;
+      }
+    }
+    setPairings((prev) => ({ ...prev, [day]: updated }));
+  };
+
   // Find player's tee time assignment and full foursome
   const findMyTeeTime = (day) => {
     const dayPairings = pairings[day];
@@ -161,7 +177,10 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
             }
           }}
           onAddGuest={(name) => updateSignup({ satGuests: [...mySignup.satGuests, name] })}
-          onRemoveGuest={(i) => updateSignup({ satGuests: mySignup.satGuests.filter((_, idx) => idx !== i) })}
+          onRemoveGuest={(i, guestName) => {
+            removeGuestFromPairings("saturday", guestName);
+            updateSignup({ satGuests: mySignup.satGuests.filter((_, idx) => idx !== i) });
+          }}
         />
 
         {/* Sunday toggle */}
@@ -179,7 +198,10 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
             }
           }}
           onAddGuest={(name) => updateSignup({ sunGuests: [...mySignup.sunGuests, name] })}
-          onRemoveGuest={(i) => updateSignup({ sunGuests: mySignup.sunGuests.filter((_, idx) => idx !== i) })}
+          onRemoveGuest={(i, guestName) => {
+            removeGuestFromPairings("sunday", guestName);
+            updateSignup({ sunGuests: mySignup.sunGuests.filter((_, idx) => idx !== i) });
+          }}
         />
 
         <p className="text-center text-gray-400 text-sm mt-6">
@@ -299,12 +321,14 @@ function DayCard({ label, isOn, guests = [], timeLocked, onToggle, onAddGuest, o
               {guests.map((g, i) => (
                 <span key={i} className="inline-flex items-center gap-1 bg-white text-[#1b4332] text-sm font-medium px-3 py-1 rounded-full border border-[#b7e4c7]">
                   {g}
-                  <button
-                    onClick={() => onRemoveGuest(i)}
-                    className="text-gray-400 hover:text-red-500 text-lg leading-none ml-0.5"
-                  >
-                    ×
-                  </button>
+                  {!isLocked && (
+                    <button
+                      onClick={() => onRemoveGuest(i, g)}
+                      className="text-gray-400 hover:text-red-500 text-lg leading-none ml-0.5"
+                    >
+                      ×
+                    </button>
+                  )}
                 </span>
               ))}
             </div>
