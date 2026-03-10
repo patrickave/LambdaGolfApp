@@ -1,4 +1,5 @@
 // PlayerDashboard — Main player view showing day toggles, tee time assignment, and guest input
+import { useState } from "react";
 import { useWeekDates } from "../hooks/useWeekDates";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { formatTime } from "../data/teeTimes";
@@ -68,39 +69,26 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
           </button>
         </div>
 
-        {/* Saturday toggle */}
-        <DayCard
-          label={saturdayStr}
-          isOn={mySignup.saturday}
-          guest={mySignup.satGuest}
-          locked={satLocked}
-          onToggle={() => updateSignup({ saturday: !mySignup.saturday, satGuest: !mySignup.saturday ? mySignup.satGuest : "" })}
-          onGuestChange={(val) => updateSignup({ satGuest: val })}
-        />
-
-        {/* Sunday toggle */}
-        <DayCard
-          label={sundayStr}
-          isOn={mySignup.sunday}
-          guest={mySignup.sunGuest}
-          locked={sunLocked}
-          onToggle={() => updateSignup({ sunday: !mySignup.sunday, sunGuest: !mySignup.sunday ? mySignup.sunGuest : "" })}
-          onGuestChange={(val) => updateSignup({ sunGuest: val })}
-        />
-
-        {/* Tee Time Display */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mt-6">
-          <h3 className="font-semibold text-[#1b4332] mb-3">Your Tee Times</h3>
+        {/* Tee Time Display — prominent, at the top */}
+        <div className={`rounded-2xl p-5 shadow-sm border-2 ${
+          satTeeTime || sunTeeTime
+            ? "bg-red-50 border-red-400"
+            : "bg-white border-gray-100"
+        }`}>
+          <h3 className={`text-xl font-bold mb-3 ${
+            satTeeTime || sunTeeTime ? "text-red-600" : "text-gray-400"
+          }`}>
+            YOUR TEE TIMES
+          </h3>
           {satTeeTime || sunTeeTime ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {satTeeTime && (
                 <div>
-                  <p className="text-lg">
-                    <span className="font-medium">Saturday:</span>{" "}
-                    <span className="text-[#2d6a4f] font-bold">{formatTime(satTeeTime.time)}</span>
+                  <p className="text-lg font-bold text-red-700">
+                    Saturday — {formatTime(satTeeTime.time)}
                   </p>
                   {satTeeTime.groupMates.length > 0 && (
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-red-600/70 mt-0.5">
                       Playing with: {satTeeTime.groupMates.join(", ")}
                     </p>
                   )}
@@ -108,12 +96,11 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
               )}
               {sunTeeTime && (
                 <div>
-                  <p className="text-lg">
-                    <span className="font-medium">Sunday:</span>{" "}
-                    <span className="text-[#2d6a4f] font-bold">{formatTime(sunTeeTime.time)}</span>
+                  <p className="text-lg font-bold text-red-700">
+                    Sunday — {formatTime(sunTeeTime.time)}
                   </p>
                   {sunTeeTime.groupMates.length > 0 && (
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-red-600/70 mt-0.5">
                       Playing with: {sunTeeTime.groupMates.join(", ")}
                     </p>
                   )}
@@ -124,6 +111,42 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
             <p className="text-gray-400">Tee time TBD — check back soon</p>
           )}
         </div>
+
+        {/* Saturday toggle */}
+        <DayCard
+          label={saturdayStr}
+          isOn={mySignup.saturday}
+          guest={mySignup.satGuest}
+          locked={satLocked}
+          onToggle={() => {
+            if (mySignup.saturday) {
+              if (window.confirm("Are you sure you want to cancel Saturday?")) {
+                updateSignup({ saturday: false, satGuest: "" });
+              }
+            } else {
+              updateSignup({ saturday: true });
+            }
+          }}
+          onGuestChange={(val) => updateSignup({ satGuest: val })}
+        />
+
+        {/* Sunday toggle */}
+        <DayCard
+          label={sundayStr}
+          isOn={mySignup.sunday}
+          guest={mySignup.sunGuest}
+          locked={sunLocked}
+          onToggle={() => {
+            if (mySignup.sunday) {
+              if (window.confirm("Are you sure you want to cancel Sunday?")) {
+                updateSignup({ sunday: false, sunGuest: "" });
+              }
+            } else {
+              updateSignup({ sunday: true });
+            }
+          }}
+          onGuestChange={(val) => updateSignup({ sunGuest: val })}
+        />
 
         <p className="text-center text-gray-400 text-sm mt-6">
           Signups lock 24 hours before tee time
