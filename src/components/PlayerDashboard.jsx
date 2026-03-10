@@ -117,12 +117,10 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
           label={saturdayStr}
           isOn={mySignup.saturday}
           guest={mySignup.satGuest}
-          locked={satLocked}
-          onToggle={() => {
-            if (mySignup.saturday) {
-              if (window.confirm("Are you sure you want to cancel Saturday?")) {
-                updateSignup({ saturday: false, satGuest: "" });
-              }
+          timeLocked={satLocked}
+          onToggle={(turnOff) => {
+            if (turnOff) {
+              updateSignup({ saturday: false, satGuest: "" });
             } else {
               updateSignup({ saturday: true });
             }
@@ -135,12 +133,10 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
           label={sundayStr}
           isOn={mySignup.sunday}
           guest={mySignup.sunGuest}
-          locked={sunLocked}
-          onToggle={() => {
-            if (mySignup.sunday) {
-              if (window.confirm("Are you sure you want to cancel Sunday?")) {
-                updateSignup({ sunday: false, sunGuest: "" });
-              }
+          timeLocked={sunLocked}
+          onToggle={(turnOff) => {
+            if (turnOff) {
+              updateSignup({ sunday: false, sunGuest: "" });
             } else {
               updateSignup({ sunday: true });
             }
@@ -156,9 +152,16 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
   );
 }
 
-// DayCard — Toggle card for a single day (Saturday or Sunday)
-function DayCard({ label, isOn, guest, locked, onToggle, onGuestChange }) {
-  if (locked) {
+// DayCard — Toggle card with auto-lock after selection, lock icon to unlock and cancel
+function DayCard({ label, isOn, guest, timeLocked, onToggle, onGuestChange }) {
+  const [userLocked, setUserLocked] = useState(true);
+  const [showCancelMsg, setShowCancelMsg] = useState(false);
+
+  // Auto-lock is active when the day is selected and user hasn't unlocked
+  const isLocked = isOn && userLocked;
+
+  // 24-hour time lockout
+  if (timeLocked) {
     return (
       <div
         className={`rounded-2xl p-5 shadow-sm border-2 transition-all duration-200 ${
@@ -171,8 +174,8 @@ function DayCard({ label, isOn, guest, locked, onToggle, onGuestChange }) {
           <span className={`text-lg font-semibold ${isOn ? "text-[#1b4332]" : "text-gray-600"}`}>
             {label}
           </span>
-          <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-lg">
-            Locked
+          <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-lg flex items-center gap-1">
+            🔒 Locked
           </span>
         </div>
         <p className="text-sm text-gray-500 mt-2">
@@ -182,6 +185,20 @@ function DayCard({ label, isOn, guest, locked, onToggle, onGuestChange }) {
     );
   }
 
+  const handleToggle = () => {
+    if (isOn) {
+      // Turning off — show cancel message
+      onToggle(true);
+      setShowCancelMsg(true);
+      setUserLocked(true);
+      setTimeout(() => setShowCancelMsg(false), 5000);
+    } else {
+      // Turning on — auto-lock after
+      onToggle(false);
+      setUserLocked(true);
+    }
+  };
+
   return (
     <div
       className={`rounded-2xl p-5 shadow-sm border-2 transition-all duration-200 ${
@@ -190,23 +207,47 @@ function DayCard({ label, isOn, guest, locked, onToggle, onGuestChange }) {
           : "bg-white border-gray-200"
       }`}
     >
-      <button
-        onClick={onToggle}
-        className="w-full flex justify-between items-center min-h-[48px]"
-      >
+      <div className="flex justify-between items-center min-h-[48px]">
         <span className={`text-lg font-semibold ${isOn ? "text-[#1b4332]" : "text-gray-600"}`}>
           {label}
         </span>
-        <span
-          className={`w-14 h-8 rounded-full flex items-center transition-all duration-200 ${
-            isOn ? "bg-[#2d6a4f] justify-end" : "bg-gray-300 justify-start"
-          }`}
-        >
-          <span className="w-6 h-6 bg-white rounded-full shadow mx-1" />
-        </span>
-      </button>
+        <div className="flex items-center gap-2">
+          {isOn && (
+            <button
+              onClick={() => setUserLocked(!userLocked)}
+              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+                userLocked ? "bg-[#b7e4c7] hover:bg-[#95d5ab]" : "bg-amber-100"
+              }`}
+              title={userLocked ? "Unlock to change" : "Lock selection"}
+            >
+              {userLocked ? "🔒" : "🔓"}
+            </button>
+          )}
+          <button
+            onClick={handleToggle}
+            disabled={isLocked}
+            className={isLocked ? "cursor-not-allowed" : ""}
+          >
+            <span
+              className={`w-14 h-8 rounded-full flex items-center transition-all duration-200 ${
+                isOn ? "bg-[#2d6a4f] justify-end" : "bg-gray-300 justify-start"
+              } ${isLocked ? "opacity-50" : ""}`}
+            >
+              <span className="w-6 h-6 bg-white rounded-full shadow mx-1" />
+            </span>
+          </button>
+        </div>
+      </div>
 
-      {isOn && (
+      {showCancelMsg && (
+        <div className="mt-3 p-3 bg-amber-50 border border-amber-300 rounded-xl">
+          <p className="text-sm text-amber-800 font-medium">
+            Please let the group know you cannot make it.
+          </p>
+        </div>
+      )}
+
+      {isOn && !isLocked && (
         <div className="mt-3 pt-3 border-t border-[#b7e4c7]">
           <label className="text-sm text-[#2d6a4f] font-medium">
             Bringing a guest?
