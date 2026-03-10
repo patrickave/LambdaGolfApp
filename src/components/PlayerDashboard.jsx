@@ -9,26 +9,28 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
   const [signups, setSignups] = useFirestore("lambdagolf_signups", {});
   const [pairings, setPairings] = useFirestore("lambdagolf_pairings", {});
 
-  const mySignup = signups[playerName] || {
-    saturday: false,
-    sunday: false,
-    satGuests: [],
-    sunGuests: [],
+  const rawSignup = signups[playerName] || {};
+
+  // Normalize signup data — handle both old (satGuest string) and new (satGuests array) format
+  const getGuests = (signup, key) => {
+    const arrayKey = key + "s"; // satGuest -> satGuests
+    if (Array.isArray(signup[arrayKey])) return signup[arrayKey];
+    if (signup[key] && typeof signup[key] === "string") return [signup[key]];
+    return [];
   };
-  // Migrate old single-guest format
-  if (typeof mySignup.satGuest === "string" && mySignup.satGuest) {
-    mySignup.satGuests = [mySignup.satGuest];
-  }
-  if (typeof mySignup.sunGuest === "string" && mySignup.sunGuest) {
-    mySignup.sunGuests = [mySignup.sunGuest];
-  }
-  if (!mySignup.satGuests) mySignup.satGuests = [];
-  if (!mySignup.sunGuests) mySignup.sunGuests = [];
+
+  const mySignup = {
+    saturday: rawSignup.saturday || false,
+    sunday: rawSignup.sunday || false,
+    satGuests: getGuests(rawSignup, "satGuest"),
+    sunGuests: getGuests(rawSignup, "sunGuest"),
+  };
 
   const updateSignup = (updates) => {
+    const current = { ...mySignup, ...updates };
     setSignups((prev) => ({
       ...prev,
-      [playerName]: { ...mySignup, ...updates },
+      [playerName]: current,
     }));
   };
 
