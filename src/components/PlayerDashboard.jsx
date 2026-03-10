@@ -47,24 +47,27 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
             <img src={`${import.meta.env.BASE_URL}lambda-logo.jpg`} alt="Lambda Golf" className="w-16 h-16 rounded-full" />
             <h1 className="text-2xl font-bold">Lambda Golf</h1>
           </div>
-          <div className="flex flex-col items-end gap-1 pt-1">
-            <button
-              onClick={onAdminClick}
-              className="text-gray-400 text-sm opacity-60 hover:opacity-100 transition-opacity"
-            >
-              Admin
-            </button>
-            <button
-              onClick={onChangeName}
-              className="text-sm text-gray-400 opacity-60 hover:opacity-100"
-            >
-              Not you?
-            </button>
-          </div>
+          <button
+            onClick={onAdminClick}
+            className="text-gray-400 text-sm opacity-60 hover:opacity-100 transition-opacity pt-1"
+          >
+            Admin
+          </button>
         </div>
       </div>
 
       <div className="px-5 mt-6 space-y-4 max-w-lg mx-auto">
+        {/* Player name with "not you" */}
+        <div className="flex items-baseline gap-2">
+          <h2 className="text-lg font-bold text-[#1b4332]">{playerName}</h2>
+          <span
+            onClick={onChangeName}
+            className="text-sm text-gray-400 cursor-pointer hover:text-gray-600 transition-colors"
+          >
+            Not you?
+          </span>
+        </div>
+
         {/* Saturday toggle */}
         <DayCard
           day="saturday"

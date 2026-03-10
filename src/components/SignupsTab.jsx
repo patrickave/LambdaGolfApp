@@ -1,11 +1,24 @@
-// SignupsTab — Admin read-only view of all member signups with filtering
+// SignupsTab — Admin view of all member signups with filtering and per-row unlock to override
 import { useState } from "react";
 import { members } from "../data/members";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
 export default function SignupsTab() {
-  const [signups] = useLocalStorage("lambdagolf_signups", {});
+  const [signups, setSignups] = useLocalStorage("lambdagolf_signups", {});
   const [filter, setFilter] = useState("all"); // "all" | "saturday" | "sunday" | "none"
+  const [unlocked, setUnlocked] = useState({}); // { [name]: true } for unlocked rows
+
+  const toggleUnlock = (name) => {
+    setUnlocked((prev) => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  const toggleDay = (name, day) => {
+    const current = signups[name] || { saturday: false, sunday: false, satGuest: "", sunGuest: "" };
+    setSignups((prev) => ({
+      ...prev,
+      [name]: { ...current, [day]: !current[day] },
+    }));
+  };
 
   const satCount = members.filter((m) => signups[m]?.saturday).length;
   const sunCount = members.filter((m) => signups[m]?.sunday).length;
@@ -24,7 +37,7 @@ export default function SignupsTab() {
       {/* Filter badges */}
       <div className="flex flex-wrap gap-2 mb-4">
         <button
-          onClick={() => setFilter(filter === "all" ? "all" : "all")}
+          onClick={() => setFilter("all")}
           className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors min-h-[36px] ${
             filter === "all" ? "bg-[#2d6a4f] text-white" : "bg-gray-200 text-gray-600"
           }`}
@@ -57,51 +70,94 @@ export default function SignupsTab() {
         </button>
       </div>
 
-      {/* Member rows — read-only */}
+      {/* Member rows */}
       <div className="space-y-2">
         {filteredMembers.map((name) => {
           const signup = signups[name] || { saturday: false, sunday: false, satGuest: "", sunGuest: "" };
           const hasResponse = signup.saturday || signup.sunday;
+          const isUnlocked = unlocked[name];
 
           return (
             <div
               key={name}
               className={`bg-white rounded-xl p-3 border transition-colors ${
-                hasResponse ? "border-gray-100" : "border-amber-200 bg-amber-50"
+                isUnlocked
+                  ? "border-blue-300 bg-blue-50"
+                  : hasResponse
+                  ? "border-gray-100"
+                  : "border-amber-200 bg-amber-50"
               }`}
             >
               <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <p className={`font-medium text-sm truncate ${!hasResponse ? "text-amber-700" : ""}`}>
-                    {name}
-                  </p>
-                  {(signup.satGuest || signup.sunGuest) && (
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {signup.satGuest && `Sat guest: ${signup.satGuest}`}
-                      {signup.satGuest && signup.sunGuest && " · "}
-                      {signup.sunGuest && `Sun guest: ${signup.sunGuest}`}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <button
+                    onClick={() => toggleUnlock(name)}
+                    className={`text-lg flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+                      isUnlocked ? "bg-blue-100" : "hover:bg-gray-100"
+                    }`}
+                    title={isUnlocked ? "Lock" : "Unlock to edit"}
+                  >
+                    {isUnlocked ? "🔓" : "🔒"}
+                  </button>
+                  <div className="min-w-0">
+                    <p className={`font-medium text-sm truncate ${!hasResponse ? "text-amber-700" : ""}`}>
+                      {name}
                     </p>
-                  )}
+                    {(signup.satGuest || signup.sunGuest) && (
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {signup.satGuest && `Sat guest: ${signup.satGuest}`}
+                        {signup.satGuest && signup.sunGuest && " · "}
+                        {signup.sunGuest && `Sun guest: ${signup.sunGuest}`}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div className="flex gap-2 ml-2">
-                  <span
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold min-h-[36px] flex items-center ${
-                      signup.saturday
-                        ? "bg-[#2d6a4f] text-white"
-                        : "bg-gray-100 text-gray-400"
-                    }`}
-                  >
-                    Sat
-                  </span>
-                  <span
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold min-h-[36px] flex items-center ${
-                      signup.sunday
-                        ? "bg-[#2d6a4f] text-white"
-                        : "bg-gray-100 text-gray-400"
-                    }`}
-                  >
-                    Sun
-                  </span>
+                  {isUnlocked ? (
+                    <>
+                      <button
+                        onClick={() => toggleDay(name, "saturday")}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold min-h-[36px] transition-colors ${
+                          signup.saturday
+                            ? "bg-[#2d6a4f] text-white"
+                            : "bg-gray-100 text-gray-500 border border-dashed border-gray-300"
+                        }`}
+                      >
+                        Sat
+                      </button>
+                      <button
+                        onClick={() => toggleDay(name, "sunday")}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold min-h-[36px] transition-colors ${
+                          signup.sunday
+                            ? "bg-[#2d6a4f] text-white"
+                            : "bg-gray-100 text-gray-500 border border-dashed border-gray-300"
+                        }`}
+                      >
+                        Sun
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold min-h-[36px] flex items-center ${
+                          signup.saturday
+                            ? "bg-[#2d6a4f] text-white"
+                            : "bg-gray-100 text-gray-400"
+                        }`}
+                      >
+                        Sat
+                      </span>
+                      <span
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold min-h-[36px] flex items-center ${
+                          signup.sunday
+                            ? "bg-[#2d6a4f] text-white"
+                            : "bg-gray-100 text-gray-400"
+                        }`}
+                      >
+                        Sun
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
