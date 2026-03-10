@@ -54,14 +54,13 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
     setPairings((prev) => ({ ...prev, [day]: updated }));
   };
 
-  // Find player's tee time assignment and group mates
+  // Find player's tee time assignment and full foursome
   const findMyTeeTime = (day) => {
     const dayPairings = pairings[day];
     if (!dayPairings) return null;
     for (const [time, players] of Object.entries(dayPairings)) {
       if (players && players.includes(playerName)) {
-        const groupMates = players.filter((p) => p && p !== playerName);
-        return { time, groupMates };
+        return { time, foursome: players };
       }
     }
     return null;
@@ -112,17 +111,19 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
             YOUR TEE TIMES
           </h3>
           {satTeeTime || sunTeeTime ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {satTeeTime && (
                 <div>
                   <p className="text-lg font-bold text-gray-900">
                     Saturday — {formatTime(satTeeTime.time)}
                   </p>
-                  {satTeeTime.groupMates.length > 0 && (
-                    <p className="text-sm text-gray-600 mt-0.5">
-                      Playing with: {satTeeTime.groupMates.join(", ")}
-                    </p>
-                  )}
+                  <ol className="mt-2 space-y-1">
+                    {satTeeTime.foursome.map((p, i) => (
+                      <li key={i} className={`text-sm ${p === playerName ? "font-bold text-[#1b4332]" : p ? "text-gray-700" : "text-gray-300"}`}>
+                        {i + 1}. {p || "Open"}
+                      </li>
+                    ))}
+                  </ol>
                 </div>
               )}
               {sunTeeTime && (
@@ -130,11 +131,13 @@ export default function PlayerDashboard({ playerName, onChangeName, onAdminClick
                   <p className="text-lg font-bold text-gray-900">
                     Sunday — {formatTime(sunTeeTime.time)}
                   </p>
-                  {sunTeeTime.groupMates.length > 0 && (
-                    <p className="text-sm text-gray-600 mt-0.5">
-                      Playing with: {sunTeeTime.groupMates.join(", ")}
-                    </p>
-                  )}
+                  <ol className="mt-2 space-y-1">
+                    {sunTeeTime.foursome.map((p, i) => (
+                      <li key={i} className={`text-sm ${p === playerName ? "font-bold text-[#1b4332]" : p ? "text-gray-700" : "text-gray-300"}`}>
+                        {i + 1}. {p || "Open"}
+                      </li>
+                    ))}
+                  </ol>
                 </div>
               )}
             </div>
