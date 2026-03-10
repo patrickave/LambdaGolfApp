@@ -10,7 +10,7 @@ const TABS = [
   { id: "pairings", label: "Pairings" },
 ];
 
-export default function AdminDashboard({ onBack }) {
+export default function AdminDashboard({ onBack, onLogout }) {
   const [activeTab, setActiveTab] = useState("signups");
 
   return (
@@ -22,12 +22,20 @@ export default function AdminDashboard({ onBack }) {
             <img src={`${import.meta.env.BASE_URL}lambda-logo.jpg`} alt="Lambda Golf" className="w-10 h-10 rounded-full" />
             <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           </div>
-          <button
-            onClick={onBack}
-            className="text-gray-400 text-sm hover:text-white transition-colors"
-          >
-            ← Player View
-          </button>
+          <div className="flex flex-col items-end gap-1">
+            <button
+              onClick={onBack}
+              className="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 text-xs font-medium hover:bg-gray-700 transition-colors"
+            >
+              ← Player View
+            </button>
+            <button
+              onClick={onLogout}
+              className="px-3 py-1.5 rounded-lg bg-red-900 text-red-300 text-xs font-medium hover:bg-red-800 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* Tab bar */}

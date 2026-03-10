@@ -58,7 +58,7 @@ export default function App() {
 
   // Admin dashboard
   if (view === "admin" && isAdmin) {
-    return <AdminDashboard onBack={() => setView("player")} />;
+    return <AdminDashboard onBack={() => setView("player")} onLogout={() => { setIsAdmin(false); setView("player"); }} />;
   }
 
   // Player dashboard (default)
